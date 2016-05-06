@@ -11,9 +11,14 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.Log;
 
+import java.io.IOException;
 import java.util.List;
 
-public class MusicService extends Service implements IMusicService {
+public class MusicService extends Service
+        implements IMusicService,
+        MediaPlayer.OnPreparedListener,
+        MediaPlayer.OnCompletionListener {
+
     private final static String TAG = "MusicService";
 
     private final IBinder mBinder = new MusicServiceBinder();
@@ -23,6 +28,7 @@ public class MusicService extends Service implements IMusicService {
     private Callback mCallback;
     private MediaPlayer mMediaPlayer;
     private WifiManager.WifiLock mWifiLock;
+    private boolean mIsTrackPrepared;
 
     public MusicService() {
     }
@@ -38,15 +44,22 @@ public class MusicService extends Service implements IMusicService {
         return mBinder;
     }
 
+    @Override
+    public void onDestroy() {
+        releaseMediaPlayer();
+        super.onDestroy();
+    }
+
     private void createMediaPlayer() {
         mMediaPlayer = new MediaPlayer();
-        mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         mMediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
 
         mWifiLock = ((WifiManager) getSystemService(Context.WIFI_SERVICE))
                 .createWifiLock(WifiManager.WIFI_MODE_FULL, "mylock");
 
         mWifiLock.acquire();
+
+        mIsTrackPrepared = false;
     }
 
     private void releaseMediaPlayer() {
@@ -55,6 +68,8 @@ public class MusicService extends Service implements IMusicService {
 
         mWifiLock.release();
         mWifiLock = null;
+
+        mIsTrackPrepared = false;
     }
 
     @Override
@@ -77,11 +92,51 @@ public class MusicService extends Service implements IMusicService {
         for (int i = 0; i < mPlaylist.size(); ++i) {
             if (mPlaylist.get(i).getId().equals(track.getId())) {
                 mPlayingTrack = i;
+                mIsTrackPrepared = false;
                 return true;
             }
         }
 
         return false;
+    }
+
+    @Override
+    public void onPrepared(MediaPlayer mp) {
+        mIsTrackPrepared = true;
+        mp.start();
+        if (mCallback != null) {
+            mCallback.onStartPlaying(mPlaylist.get(mPlayingTrack));
+        }
+    }
+
+    @Override
+    public void onCompletion(MediaPlayer mp) {
+        if (mCallback != null) {
+            mCallback.onEndPlaying(mPlaylist.get(mPlayingTrack));
+        }
+
+        ++mPlayingTrack;
+        mIsTrackPrepared = false;
+
+        if (mPlayingTrack >= mPlaylist.size()) {
+            if (mCallback != null) {
+                mCallback.onPlaylistEnd(mPlaylist);
+            }
+        } else {
+            startWithPreparingTrack();
+        }
+    }
+
+    private void startWithPreparingTrack() {
+        mMediaPlayer.reset();
+        mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        try {
+            mMediaPlayer.setDataSource(mPlaylist.get(mPlayingTrack).getLink());
+        } catch (IOException e) {
+            if (mCallback != null) {
+                mCallback.onError(Error.WRONG_LINK);
+            }
+        }
     }
 
     @Override
@@ -91,14 +146,27 @@ public class MusicService extends Service implements IMusicService {
         }
 
         mWifiLock.acquire();
-        //
-    }  
+
+        if (mIsTrackPrepared) {
+            mMediaPlayer.start();
+            if (mCallback != null) {
+                mCallback.onStartPlaying(mPlaylist.get(mPlayingTrack));
+            }
+        } else {
+            startWithPreparingTrack();
+        }
+    }
 
     @Override
     public void pause() {
         if (mMediaPlayer != null) {
+
             mWifiLock.release();
             mMediaPlayer.pause();
+
+            if (mCallback != null) {
+                mCallback.onPausePlaying(mPlaylist.get(mPlayingTrack));
+            }
         } else {
             Log.e(TAG, "pause / null MediaPlayer");
         }
@@ -173,4 +241,5 @@ public class MusicService extends Service implements IMusicService {
     public void setCallback(Callback callback) {
         mCallback = callback;
     }
+
 }

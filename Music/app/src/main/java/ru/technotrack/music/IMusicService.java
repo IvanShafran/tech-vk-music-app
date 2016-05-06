@@ -14,6 +14,7 @@ public interface IMusicService {
         //когда песня приостанваливается
         void onPausePlaying(Track track);
 
+        //когда песня закончилась
         void onEndPlaying(Track track);
 
         //вызывется, когда плейлист закончился
