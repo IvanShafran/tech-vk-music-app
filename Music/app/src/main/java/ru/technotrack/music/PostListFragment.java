@@ -67,7 +67,7 @@ public class PostListFragment extends Fragment {
         display.getSize(size);
         int width = size.x;
         int height = size.y / 3;
-        width -= Utils.getDevicePixels(getContext(), 30);//отступ от краёв по заданию
+        width -= Utils.getDevicePixels(getContext(), 30); //у cardview такой margin
 
         mAdapter = new PostRecycleViewAdapter(getPosts(), this.getContext(),
                 mType,

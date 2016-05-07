@@ -79,7 +79,9 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         switch (id) {
-            case R.id.nav_player:
+            case R.id.nav_current_playlist:
+                break;
+            case R.id.nav_saved_tracks:
                 break;
             case R.id.nav_search:
                 getSupportFragmentManager().beginTransaction().replace(R.id.content_main,
