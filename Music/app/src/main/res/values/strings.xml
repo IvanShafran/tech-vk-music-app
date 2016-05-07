@@ -6,6 +6,9 @@
 
     <string name="action_settings">Settings</string>
     <string name="nav_search">Cool search</string>
-    <string name="nav_player">Listen music</string>
+    <string name="nav_saved_music">Saved music</string>
+    <string name="nav_current_playlist">Current playlist</string>
     <string name="nav_settings">Settings</string>
+
+    <string name="artist_name_separator" formatted="false">%s - %s</string>
 </resources>
