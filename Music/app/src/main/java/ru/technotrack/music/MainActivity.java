@@ -82,6 +82,8 @@ public class MainActivity extends AppCompatActivity
             case R.id.nav_player:
                 break;
             case R.id.nav_search:
+                getSupportFragmentManager().beginTransaction().replace(R.id.content_main,
+                        new PostListFragment()).commit();
                 break;
             case R.id.nav_settings:
                 break;
