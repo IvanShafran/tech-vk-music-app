@@ -10,7 +10,7 @@
         android:layout_gravity="center"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="15dp"
+        android:layout_margin="@dimen/activity_vertical_margin"
         card_view:cardCornerRadius="4dp">
 
         <LinearLayout
@@ -18,16 +18,16 @@
           android:layout_width="match_parent"
           android:layout_height="wrap_content">
             <TextView
+                android:textAppearance="?android:attr/textAppearanceMedium"
                 android:id="@+id/post_text"
-                android:gravity="center_horizontal"
-                android:layout_marginBottom="10dp"
+                android:layout_margin="@dimen/activity_vertical_margin"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
 
             <ImageView
                 android:id="@+id/post_image"
                 android:src="@drawable/ic_menu_camera"
-                android:layout_marginBottom="10dp"
+                android:layout_margin="@dimen/activity_vertical_margin"
                 android:layout_gravity="center_horizontal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
@@ -35,6 +35,7 @@
             <LinearLayout
                 android:id="@+id/post_tracks"
                 android:orientation="vertical"
+                android:layout_margin="@dimen/activity_vertical_margin"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
             </LinearLayout>

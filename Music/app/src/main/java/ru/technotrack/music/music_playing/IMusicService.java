@@ -1,6 +1,8 @@
-package ru.technotrack.music;
+package ru.technotrack.music.music_playing;
 
 import java.util.List;
+
+import ru.technotrack.music.model.Track;
 
 public interface IMusicService {
     enum Error {
@@ -9,13 +11,13 @@ public interface IMusicService {
 
     interface Callback {
         //вызывается, когда песня начинает проигрываться
-        void onStartPlaying(Track track);
+        void onStartPlaying(int trackIndex);
 
         //когда песня приостанваливается
-        void onPausePlaying(Track track);
+        void onPausePlaying(int trackIndex);
 
         //когда песня закончилась
-        void onEndPlaying(Track track);
+        void onEndPlaying(int trackIndex);
 
         //вызывется, когда плейлист закончился
         void onPlaylistEnd(List<Track> playlist);
@@ -34,7 +36,7 @@ public interface IMusicService {
     //true, если такой трек есть в плейлисте
     //!!! переключится только указатель на песню
     // сама она играть не начнёт
-    boolean gotoTrackInPlaylist(Track track);
+    boolean setTrackInPlaylist(int trackIndex);
 
     //включить воспроизведение
     void play();
@@ -53,6 +55,8 @@ public interface IMusicService {
     void seekTo(int position);
 
     boolean isPlaying();
+
+    int getPlayingTrack();
 
     //приглушение, когда другие приложения этого просят
     void startDuckMode();

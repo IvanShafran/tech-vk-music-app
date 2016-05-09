@@ -1,4 +1,4 @@
-package ru.technotrack.music;
+package ru.technotrack.music.net;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -90,7 +90,6 @@ public class ImageManager {
                 BitmapFactory.decodeStream(is, null, options);
                 options.inSampleSize =
                         getInSampleSize(options.outWidth, options.outHeight, mWidth, mHeight);
-
                 options.inJustDecodeBounds = false;
                 Bitmap bitmap = BitmapFactory.decodeStream(new FileInputStream(file),
                         null, options);
@@ -101,7 +100,7 @@ public class ImageManager {
                 }
                 return bitmap;
             } catch (IOException e) {
-                Log.e("LoadImageTask", "LoadImageTask.LoadBitmap IOException " + e.getMessage(), e);
+                Log.i("LoadImageTask", "LoadImageTask.LoadBitmap IOException " + e.getMessage(), e);
             }
             return null;
         }
@@ -202,6 +201,7 @@ public class ImageManager {
                     width, height);
 
             DownloadDrawable dd = new DownloadDrawable(lt);
+            imageView.setLayoutParams(new LinearLayout.LayoutParams(width, height));
             imageView.setImageDrawable(dd);
 
             lt.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);

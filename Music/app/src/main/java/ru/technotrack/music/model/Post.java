@@ -1,4 +1,4 @@
-package ru.technotrack.music;
+package ru.technotrack.music.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;

@@ -1,8 +1,4 @@
-package ru.technotrack.music;
-
-import android.content.Context;
-import android.util.DisplayMetrics;
-import android.util.TypedValue;
+package ru.technotrack.music.net;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -20,10 +16,5 @@ public class Utils {
             }
         } catch(Exception e) {
         }
-    }
-
-    public static int getDevicePixels(Context context, int densityPixels) {
-        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-        return (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, densityPixels, metrics);
     }
 }

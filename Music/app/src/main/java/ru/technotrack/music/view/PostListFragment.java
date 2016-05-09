@@ -1,4 +1,4 @@
-package ru.technotrack.music;
+package ru.technotrack.music.view;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -15,6 +15,11 @@ import android.view.WindowManager;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import ru.technotrack.music.R;
+import ru.technotrack.music.model.Post;
+import ru.technotrack.music.model.Track;
+import ru.technotrack.music.net.ImageManager;
 
 public class PostListFragment extends Fragment {
 
@@ -66,8 +71,10 @@ public class PostListFragment extends Fragment {
         Point size = new Point();
         display.getSize(size);
         int width = size.x;
+        //почему бы и не на треть экрана
         int height = size.y / 3;
-        width -= Utils.getDevicePixels(getContext(), 30); //у cardview такой margin
+        //отступ у картинки от краёв
+        width -= 2 * getResources().getDimensionPixelSize(R.dimen.activity_horizontal_margin);
 
         mAdapter = new PostRecycleViewAdapter(getPosts(), this.getContext(),
                 mType,
@@ -79,33 +86,26 @@ public class PostListFragment extends Fragment {
 
     private List<Post> getPosts() {
         List<Post> posts = new ArrayList<>();
+
         Post post = new Post();
-        post.setText("asajaskjlasjkjaskjlkaskjl");
-        post.setPictureLink("https://pp.vk.me/c543103/v543103715/13644/Xbeg-5apRVA.jpg");
+        post.setText("Немного расслабляющей музыки перед завтрашним матаном. На на на на");
+        post.setPictureLink("https://pp.vk.me/c543103/v543103503/dd29/zAf3dFezoqs.jpg");
         Track track = new Track();
-        track.setArtist("Иван");
-        track.setName("душевная");
-        track.setLink("123");
+        track.setArtist("William Fitzsimmons");
+        track.setName("I Kissed A Girl");
+        track.setLink("https://cs1-37v4.vk-cdn.net/p22/bd953fabf94e29.mp3?extra=j2KleBWmeZZoo4nYFZPBzs4bE2p_JjZKPSOqSuINK9vpXMPSgeFJ-zi9jrZzAb4SjGlKRA4H6qCaIb0M_JhcOt5wreLgDHcrKcq_-CGcWI3aM_J4rVAP_noApPXHcrb9Mi8tKcZf12Eb,192");
 
         List<Track> tracks = new ArrayList<>();
         tracks.add(track);
 
         track = new Track();
-        track.setName("душевная");
-        track.setLink("123");
-        track.setArtist("Ваня");
-        tracks.add(track);
-
-        track = new Track();
-        track.setName("душевная");
-        track.setLink("123");
-        track.setArtist("Вано");
+        track.setName("Kill The Humans");
+        track.setLink("https://psv4.vk.me/c5009/u5698326/audios/b19613ab9b11.mp3?extra=S7o7cHCdzzofj7hnQGKFCGZfoQNNTQdEJSwpPQ81ngs3fmSHyMFXLKzS9WOyMynhjmQHHVCCZ8BnLtEE2N5-573hqtfLw10jx4TjeXAys0hkhkmcTxDMEoqgdh-Djvmu2kV94Bsoh9On,239");
+        track.setArtist("Hypnogaja");
         tracks.add(track);
 
         post.setTracks(tracks);
 
-        posts.add(post);
-        posts.add(post);
         posts.add(post);
 
         return posts;

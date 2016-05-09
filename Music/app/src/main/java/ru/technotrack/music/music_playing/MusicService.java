@@ -1,4 +1,4 @@
-package ru.technotrack.music;
+package ru.technotrack.music.music_playing;
 
 import android.app.Service;
 import android.content.Context;
@@ -14,10 +14,13 @@ import android.util.Log;
 import java.io.IOException;
 import java.util.List;
 
+import ru.technotrack.music.model.Track;
+
 public class MusicService extends Service
         implements IMusicService,
         MediaPlayer.OnPreparedListener,
-        MediaPlayer.OnCompletionListener {
+        MediaPlayer.OnCompletionListener,
+        AudioManager.OnAudioFocusChangeListener {
 
     private final static String TAG = "MusicService";
 
@@ -29,6 +32,9 @@ public class MusicService extends Service
     private MediaPlayer mMediaPlayer;
     private WifiManager.WifiLock mWifiLock;
     private boolean mIsTrackPrepared;
+
+    private int mAudioFocusState;
+    private boolean mIsMusicWasPlaying;
 
     public MusicService() {
     }
@@ -42,6 +48,56 @@ public class MusicService extends Service
     @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        int result = audioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC,
+                AudioManager.AUDIOFOCUS_GAIN);
+
+        if (result != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+            Log.e(TAG, "could not get audio focus");
+        }
+    }
+
+    @Override
+    public void onAudioFocusChange(int focusChange) {
+        switch (focusChange) {
+            case AudioManager.AUDIOFOCUS_GAIN:
+                switch (mAudioFocusState) {
+                    case AudioManager.AUDIOFOCUS_LOSS:
+                        break;
+
+                    case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+                        if (mIsMusicWasPlaying) {
+                            play();
+                        }
+                        break;
+
+                    case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+                        finishDuckMode();
+                        break;
+                }
+                break;
+
+            case AudioManager.AUDIOFOCUS_LOSS:
+                stop();
+                break;
+
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+                mIsMusicWasPlaying = isPlaying();
+                pause();
+                break;
+
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+                startDuckMode();
+                break;
+        }
+
+        mAudioFocusState = focusChange;
     }
 
     @Override
@@ -63,10 +119,14 @@ public class MusicService extends Service
     }
 
     private void releaseMediaPlayer() {
-        mMediaPlayer.release();
+        if (mMediaPlayer != null) {
+            mMediaPlayer.release();
+        }
         mMediaPlayer = null;
 
-        mWifiLock.release();
+        if (mWifiLock != null) {
+            mWifiLock.release();
+        }
         mWifiLock = null;
 
         mIsTrackPrepared = false;
@@ -74,7 +134,6 @@ public class MusicService extends Service
 
     @Override
     public void setPlaylist(List<Track> playlist) {
-        mPlayingTrack = 0;
         mPlaylist = playlist;
     }
 
@@ -84,35 +143,33 @@ public class MusicService extends Service
     }
 
     @Override
-    public boolean gotoTrackInPlaylist(Track track) {
-        if (mPlaylist == null) {
+    public boolean setTrackInPlaylist(int trackIndex) {
+        if (mPlaylist == null || trackIndex < 0 || trackIndex >= mPlaylist.size()) {
             return false;
         }
 
-        for (int i = 0; i < mPlaylist.size(); ++i) {
-            if (mPlaylist.get(i).getId().equals(track.getId())) {
-                mPlayingTrack = i;
-                mIsTrackPrepared = false;
-                return true;
+        if (mIsTrackPrepared && mPlayingTrack == trackIndex) {
+            return true;
+        } else {
+            if (mCallback != null) {
+                mCallback.onPausePlaying(mPlayingTrack);
             }
+            mPlayingTrack = trackIndex;
+            mIsTrackPrepared = false;
+            return true;
         }
-
-        return false;
     }
 
     @Override
     public void onPrepared(MediaPlayer mp) {
         mIsTrackPrepared = true;
         mp.start();
-        if (mCallback != null) {
-            mCallback.onStartPlaying(mPlaylist.get(mPlayingTrack));
-        }
     }
 
     @Override
     public void onCompletion(MediaPlayer mp) {
         if (mCallback != null) {
-            mCallback.onEndPlaying(mPlaylist.get(mPlayingTrack));
+            mCallback.onEndPlaying(mPlayingTrack);
         }
 
         ++mPlayingTrack;
@@ -132,6 +189,13 @@ public class MusicService extends Service
         mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         try {
             mMediaPlayer.setDataSource(mPlaylist.get(mPlayingTrack).getLink());
+            mMediaPlayer.setOnPreparedListener(this);
+            mMediaPlayer.setOnCompletionListener(this);
+            mMediaPlayer.prepareAsync();
+
+            if (mCallback != null) {
+                mCallback.onStartPlaying(mPlayingTrack);
+            }
         } catch (IOException e) {
             if (mCallback != null) {
                 mCallback.onError(Error.WRONG_LINK);
@@ -150,7 +214,7 @@ public class MusicService extends Service
         if (mIsTrackPrepared) {
             mMediaPlayer.start();
             if (mCallback != null) {
-                mCallback.onStartPlaying(mPlaylist.get(mPlayingTrack));
+                mCallback.onStartPlaying(mPlayingTrack);
             }
         } else {
             startWithPreparingTrack();
@@ -165,7 +229,7 @@ public class MusicService extends Service
             mMediaPlayer.pause();
 
             if (mCallback != null) {
-                mCallback.onPausePlaying(mPlaylist.get(mPlayingTrack));
+                mCallback.onPausePlaying(mPlayingTrack);
             }
         } else {
             Log.e(TAG, "pause / null MediaPlayer");
@@ -186,6 +250,11 @@ public class MusicService extends Service
         }
 
         return false;
+    }
+
+    @Override
+    public int getPlayingTrack() {
+        return mPlayingTrack;
     }
 
     @Override
