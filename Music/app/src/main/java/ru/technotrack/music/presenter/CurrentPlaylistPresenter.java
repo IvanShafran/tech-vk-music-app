@@ -8,13 +8,12 @@ import android.os.IBinder;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.List;
 
-import ru.technotrack.music.music_playing.IMusicService;
 import ru.technotrack.music.model.IMusicStorage;
-import ru.technotrack.music.music_playing.MusicService;
 import ru.technotrack.music.model.StubMusicStorage;
 import ru.technotrack.music.model.Track;
+import ru.technotrack.music.music_playing.IMusicService;
+import ru.technotrack.music.music_playing.MusicService;
 import ru.technotrack.music.view.ICurrentPlaylistView;
 
 public class CurrentPlaylistPresenter implements ICurrentPlaylistPresenter, MusicService.Callback {
@@ -34,6 +33,10 @@ public class CurrentPlaylistPresenter implements ICurrentPlaylistPresenter, Musi
             mMusicService = musicServiceBinder.getMusicService();
             mMusicService.setCallback(CurrentPlaylistPresenter.this);
             mIsBoundService = true;
+
+            if (mMusicService.getPlaylist() != null) {
+                mTracks = mMusicService.getPlaylist();
+            }
         }
 
         @Override
@@ -129,8 +132,14 @@ public class CurrentPlaylistPresenter implements ICurrentPlaylistPresenter, Musi
 
     @Override
     public void onCreate(Context context) {
-        Intent intent = new Intent(context, MusicService.class);
-        context.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        Intent intent = new Intent(context.getApplicationContext(), MusicService.class);
+
+        intent.setFlags(Intent.FLAG_FROM_BACKGROUND);
+        intent.setAction(MusicService.STARTFOREGROUND_ACTION);
+        context.getApplicationContext()
+                .startService(intent);
+
+        context.getApplicationContext().bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 
         mMusicStorage = new StubMusicStorage();
         mMusicStorage.loadTracks();
@@ -139,7 +148,7 @@ public class CurrentPlaylistPresenter implements ICurrentPlaylistPresenter, Musi
     @Override
     public void onDestroy(Context context) {
         if (mIsBoundService) {
-            context.unbindService(mConnection);
+            context.getApplicationContext().unbindService(mConnection);
             mIsBoundService = false;
         }
 
@@ -170,7 +179,7 @@ public class CurrentPlaylistPresenter implements ICurrentPlaylistPresenter, Musi
     }
 
     @Override
-    public void onPlaylistEnd(List<Track> playlist) {
+    public void onPlaylistEnd(ArrayList<Track> playlist) {
 
     }
 

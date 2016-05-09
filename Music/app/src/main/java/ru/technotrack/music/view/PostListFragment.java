@@ -108,6 +108,29 @@ public class PostListFragment extends Fragment {
 
         posts.add(post);
 
+        post = new Post();
+        post.setText("System Of A Down \n" +
+                "\n" +
+                "Американская рок-группа, образованная в 1992 году в Лос-Анджелесе Сержем Танкяном и Дароном Малакяном под названием Soil, а в 1995 принявшая нынешнее название. Все участники группы имеют армянское происхождение. В период с 1998 по 2005 год группа выпустила пять студийных альбомов, каждый из которых стал платиновым (наиболее успешный — мультиплатиновый Toxicity), общим тиражом свыше 12 миллионов экземпляров. В 2006 году участники System of a Down решили временно приостановить совместную деятельность и заняться сольными проектами. 29 ноября 2010 года группа объявила о воссоединении и проведении европейского турне в 2011 году. Изначально группа должна была называться «Victims of the Down» — по стихотворению, написанному Дароном Малакяном. При совместном обсуждении участниками было решено заменить слово «victims» на более общее «system». Причиной замены также послужило желание Шаво Одаджяна расположить группу ближе к Slayer на полках музыкальных магазинов.");
+        post.setPictureLink("https://pp.vk.me/c7001/v7001287/16fd7/PAangtN-sdY.jpg");
+        track = new Track();
+        track.setArtist("System of a down");
+        track.setName("Lonely Day");
+        track.setLink("https://psv4.vk.me/c4962/u18432735/audios/73675007d380.mp3?extra=uLKUHfI9e4V0EB-yvz-lltZkuZthcxX-2ayEvUuAx_F_Hb_DjRvVHte_UZKyYckIMFqPuj7J0-c44m_KMX4oG158gq4B-6_GUehWvsvzmwO0aaz1-WB4Yx1tsqS4-qcDo-vt5Mww0DIn,167");
+
+        tracks = new ArrayList<>();
+        tracks.add(track);
+
+        track = new Track();
+        track.setName("Aerials");
+        track.setLink("https://cs1-29v4.vk-cdn.net/p17/54e140f8ef0cb3.mp3?extra=Rw_sLjZismD5orbiCd6jciOfPHM3bZkgZwlo_dnxPW8ArTxDySiTDvO3Pa_bxDGzrxLZPjW4k2eGDOLhzRhVF7tU-X0ReMWoyWMwJFGVCI4evKrDdbRAIEExoAQ-bq3syKG3GMdgWYyJ,233");
+        track.setArtist("System of a down");
+        tracks.add(track);
+
+        post.setTracks(tracks);
+
+        posts.add(post);
+
         return posts;
     }
 }

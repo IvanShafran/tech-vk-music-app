@@ -1,5 +1,7 @@
 package ru.technotrack.music.music_playing;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -10,10 +12,15 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.Log;
+import android.widget.RemoteViews;
+import android.widget.Toast;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.ArrayList;
 
+import ru.technotrack.music.MainActivity;
+import ru.technotrack.music.R;
+import ru.technotrack.music.Settings;
 import ru.technotrack.music.model.Track;
 
 public class MusicService extends Service
@@ -22,11 +29,9 @@ public class MusicService extends Service
         MediaPlayer.OnCompletionListener,
         AudioManager.OnAudioFocusChangeListener {
 
-    private final static String TAG = "MusicService";
-
     private final IBinder mBinder = new MusicServiceBinder();
 
-    private List<Track> mPlaylist;
+    private ArrayList<Track> mPlaylist;
     private int mPlayingTrack;
     private Callback mCallback;
     private MediaPlayer mMediaPlayer;
@@ -34,7 +39,7 @@ public class MusicService extends Service
     private boolean mIsTrackPrepared;
 
     private int mAudioFocusState;
-    private boolean mIsMusicWasPlaying;
+    private boolean mIsMusicPlaying;
 
     public MusicService() {
     }
@@ -57,6 +62,183 @@ public class MusicService extends Service
         requestAudioFocus();
     }
 
+    private final static String TAG = "MUSIC_SERVICE";
+    public final static String STARTFOREGROUND_ACTION = "STARTFOREGROUND_ACTION";
+    public final static String STOPFOREGROUND_ACTION = "STOPFOREGROUND_ACTION";
+    public final static String PLAY_ACTION = "PLAY_ACTION";
+    public final static String PREV_ACTION = "PREV_ACTION";
+    public final static String NEXT_ACTION = "NEXT_ACTION";
+    public final static String MAIN_ACTION = "MAIN_ACTION";
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent != null) {
+
+            String action = intent.getAction();
+
+            switch (action) {
+                case STARTFOREGROUND_ACTION:
+                    Log.d(TAG, STARTFOREGROUND_ACTION);
+                    showNotification();
+                    break;
+                case STOPFOREGROUND_ACTION:
+                    Log.d(TAG, STOPFOREGROUND_ACTION);
+                    stopForeground(true);
+                    stopSelf();
+                    break;
+                case PLAY_ACTION:
+                    Log.d(TAG, PLAY_ACTION);
+
+                    if (mPlaylist == null) {
+                        Toast.makeText(this,
+                                "You didn't choose any playlist", Toast.LENGTH_SHORT).show();
+                        break;
+                    }
+
+                    if (mIsMusicPlaying) {
+                        pause();
+                        updateNotificationViewsState(false);
+                    } else {
+                        play();
+                        updateNotificationViewsState(true);
+                    }
+                    break;
+                case PREV_ACTION:
+                    Log.d(TAG, PREV_ACTION);
+                    if (mPlaylist == null) {
+                        Toast.makeText(this,
+                                "You didn't choose any playlist", Toast.LENGTH_SHORT).show();
+                        break;
+                    }
+
+                    if (mPlayingTrack == 0 && !Settings.getInstance().isRepeatPlaylist()) {
+                        Toast.makeText(this, "This is first track in playlist!",
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                    }
+
+                    setPrevTrack();
+                    updateNotificationViewsState(true);
+                    break;
+                case NEXT_ACTION:
+                    Log.d(TAG, NEXT_ACTION);
+                    if (mPlaylist == null) {
+                        Toast.makeText(this,
+                                "You didn't choose any playlist", Toast.LENGTH_SHORT).show();
+                        break;
+                    }
+
+                    if (mPlayingTrack == mPlaylist.size() - 1
+                            && !Settings.getInstance().isRepeatPlaylist()) {
+                        Toast.makeText(this, "This is first track in playlist!",
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                    }
+
+                    setNextTrack();
+                    updateNotificationViewsState(true);
+                    break;
+            }
+        }
+
+        return START_STICKY;
+    }
+
+    private void updateNotificationViewsState(boolean isMusicPlaying) {
+        if (isMusicPlaying) {
+            mViews.setImageViewResource(R.id.status_bar_play,
+                    R.drawable.ic_pause_black_48dp);
+            mBigViews.setImageViewResource(R.id.status_bar_play,
+                    R.drawable.ic_pause_black_48dp);
+        } else {
+            mViews.setImageViewResource(R.id.status_bar_play,
+                    R.drawable.ic_play_arrow_black_48dp);
+            mBigViews.setImageViewResource(R.id.status_bar_play,
+                    R.drawable.ic_play_arrow_black_48dp);
+        }
+
+        if (mPlaylist != null) {
+            Track track = mPlaylist.get(mPlayingTrack);
+            mViews.setTextViewText(R.id.status_bar_track_name, track.getName());
+            mBigViews.setTextViewText(R.id.status_bar_track_name, track.getName());
+
+            mViews.setTextViewText(R.id.status_bar_artist_name, track.getArtist());
+            mBigViews.setTextViewText(R.id.status_bar_artist_name, track.getArtist());
+        }
+
+        status.bigContentView = mBigViews;
+        status.contentView = mViews;
+        startForeground(123, status);
+    }
+
+    Notification status;
+    private final String LOG_TAG = "NotificationService";
+    private RemoteViews mViews;
+    private RemoteViews mBigViews;
+
+    private void showNotification() {
+        RemoteViews views = new RemoteViews(getPackageName(),
+                R.layout.status_bar);
+        mViews = views;
+        RemoteViews bigViews = new RemoteViews(getPackageName(),
+                R.layout.status_bar_expanded);
+        mBigViews = bigViews;
+
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        notificationIntent.setAction(MAIN_ACTION);
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
+                notificationIntent, 0);
+
+        Intent previousIntent = new Intent(this, MusicService.class);
+        previousIntent.setAction(PREV_ACTION);
+        PendingIntent ppreviousIntent = PendingIntent.getService(this, 0,
+                previousIntent, 0);
+
+        Intent playIntent = new Intent(this, MusicService.class);
+        playIntent.setAction(PLAY_ACTION);
+        PendingIntent pplayIntent = PendingIntent.getService(this, 0,
+                playIntent, 0);
+
+        Intent nextIntent = new Intent(this, MusicService.class);
+        nextIntent.setAction(NEXT_ACTION);
+        PendingIntent pnextIntent = PendingIntent.getService(this, 0,
+                nextIntent, 0);
+
+        Intent closeIntent = new Intent(this, MusicService.class);
+        closeIntent.setAction(STOPFOREGROUND_ACTION);
+        PendingIntent pcloseIntent = PendingIntent.getService(this, 0,
+                closeIntent, 0);
+
+        views.setOnClickPendingIntent(R.id.status_bar_play, pplayIntent);
+        bigViews.setOnClickPendingIntent(R.id.status_bar_play, pplayIntent);
+
+        views.setOnClickPendingIntent(R.id.status_bar_next, pnextIntent);
+        bigViews.setOnClickPendingIntent(R.id.status_bar_next, pnextIntent);
+
+        views.setOnClickPendingIntent(R.id.status_bar_prev, ppreviousIntent);
+        bigViews.setOnClickPendingIntent(R.id.status_bar_prev, ppreviousIntent);
+
+        views.setOnClickPendingIntent(R.id.status_bar_collapse, pcloseIntent);
+        bigViews.setOnClickPendingIntent(R.id.status_bar_collapse, pcloseIntent);
+
+        views.setTextViewText(R.id.status_bar_track_name, "Song Title");
+        bigViews.setTextViewText(R.id.status_bar_track_name, "Song Title");
+
+        views.setTextViewText(R.id.status_bar_artist_name, "Artist Name");
+        bigViews.setTextViewText(R.id.status_bar_artist_name, "Artist Name");
+
+        status = new Notification.Builder(this).build();
+        status.contentView = views;
+        status.bigContentView = bigViews;
+        status.flags = Notification.FLAG_ONGOING_EVENT;
+        status.icon = R.drawable.ic_music_note_black_48dp;
+        status.contentIntent = pendingIntent;
+
+        updateNotificationViewsState(false);
+    }
+
     private void requestAudioFocus() {
         AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         int result = audioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC,
@@ -76,7 +258,7 @@ public class MusicService extends Service
                         break;
 
                     case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
-                        if (mIsMusicWasPlaying) {
+                        if (mIsMusicPlaying) {
                             play();
                         }
                         break;
@@ -92,7 +274,6 @@ public class MusicService extends Service
                 break;
 
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
-                mIsMusicWasPlaying = isPlaying();
                 pause();
                 break;
 
@@ -137,12 +318,13 @@ public class MusicService extends Service
     }
 
     @Override
-    public void setPlaylist(List<Track> playlist) {
+    public void setPlaylist(ArrayList<Track> playlist) {
         mPlaylist = playlist;
+        mIsTrackPrepared = false;
     }
 
     @Override
-    public List<Track> getPlaylist() {
+    public ArrayList<Track> getPlaylist() {
         return mPlaylist;
     }
 
@@ -165,6 +347,48 @@ public class MusicService extends Service
     }
 
     @Override
+    public void setNextTrack() {
+        if (mCallback != null) {
+            mCallback.onPausePlaying(mPlayingTrack);
+        }
+
+        ++mPlayingTrack;
+        mIsTrackPrepared = false;
+        if (mPlayingTrack == mPlaylist.size()) {
+            if (Settings.getInstance().isRepeatPlaylist()) {
+                mPlayingTrack = 0;
+            } else {
+                mPlayingTrack = mPlaylist.size() - 1;
+            }
+        }
+
+        if (mIsMusicPlaying) {
+            play();
+        }
+    }
+
+    @Override
+    public void setPrevTrack() {
+        if (mCallback != null) {
+            mCallback.onPausePlaying(mPlayingTrack);
+        }
+
+        --mPlayingTrack;
+        mIsTrackPrepared = false;
+        if (mPlayingTrack == -1) {
+            if (Settings.getInstance().isRepeatPlaylist()) {
+                mPlayingTrack = mPlaylist.size() - 1;
+            } else {
+                mPlayingTrack = 0;
+            }
+        }
+
+        if (mIsMusicPlaying) {
+            play();
+        }
+    }
+
+    @Override
     public void onPrepared(MediaPlayer mp) {
         mIsTrackPrepared = true;
         mp.start();
@@ -178,10 +402,16 @@ public class MusicService extends Service
 
         ++mPlayingTrack;
         mIsTrackPrepared = false;
+        mIsMusicPlaying = false;
 
         if (mPlayingTrack >= mPlaylist.size()) {
             if (mCallback != null) {
                 mCallback.onPlaylistEnd(mPlaylist);
+
+                if (Settings.getInstance().isRepeatPlaylist()) {
+                    mPlayingTrack = 0;
+                    startWithPreparingTrack();
+                }
             }
         } else {
             startWithPreparingTrack();
@@ -209,6 +439,8 @@ public class MusicService extends Service
 
     @Override
     public void play() {
+        mIsMusicPlaying = true;
+
         if (mMediaPlayer == null) {
             createMediaPlayer();
         }
@@ -227,10 +459,14 @@ public class MusicService extends Service
         } else {
             startWithPreparingTrack();
         }
+
+        updateNotificationViewsState(true);
     }
 
     @Override
     public void pause() {
+        mIsMusicPlaying = false;
+
         if (mMediaPlayer != null) {
 
             mWifiLock.release();
@@ -242,25 +478,25 @@ public class MusicService extends Service
         } else {
             Log.e(TAG, "pause / null MediaPlayer");
         }
+
+        updateNotificationViewsState(false);
     }
 
     @Override
     public void stop() {
-        if (mCallback != null && isPlaying()) {
+        if (mCallback != null && mIsMusicPlaying) {
             mCallback.onEndPlaying(mPlayingTrack);
         }
+
+        mIsMusicPlaying = false;
+
         releaseMediaPlayer();
+        updateNotificationViewsState(false);
     }
 
     @Override
     public boolean isPlaying() {
-        if (mMediaPlayer != null) {
-            return mMediaPlayer.isPlaying();
-        } else {
-            Log.e(TAG, "isPlaying / null MediaPlayer");
-        }
-
-        return false;
+        return mIsMusicPlaying;
     }
 
     @Override

@@ -1,6 +1,6 @@
 package ru.technotrack.music.music_playing;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import ru.technotrack.music.model.Track;
 
@@ -20,7 +20,7 @@ public interface IMusicService {
         void onEndPlaying(int trackIndex);
 
         //вызывется, когда плейлист закончился
-        void onPlaylistEnd(List<Track> playlist);
+        void onPlaylistEnd(ArrayList<Track> playlist);
 
         //вызывается в случае ошибки
         void onError(Error error);
@@ -28,15 +28,20 @@ public interface IMusicService {
 
     //Установить плейлист для воспроизведения.
     //Песни в плейлисте воспроизводятся по порядку
-    void setPlaylist(List<Track> playlist);
+    void setPlaylist(ArrayList<Track> playlist);
 
-    List<Track> getPlaylist();
+    ArrayList<Track> getPlaylist();
 
     //перейти к определённому треку в плейлисте
     //true, если такой трек есть в плейлисте
     //!!! переключится только указатель на песню
     // сама она играть не начнёт
     boolean setTrackInPlaylist(int trackIndex);
+
+    void setNextTrack();
+    void setPrevTrack();
+
+
 
     //включить воспроизведение
     void play();

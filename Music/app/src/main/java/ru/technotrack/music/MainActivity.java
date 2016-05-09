@@ -34,6 +34,15 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         CurrentPlaylistPresenter.getInstance().onCreate(this);
+        Settings.getInstance().loadSettings(this);
+
+        navigationView.setCheckedItem(R.id.nav_saved_tracks);
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.content_main, PlayListFragment
+                        .newInstance(CurrentPlaylistPresenter
+                                .getInstance().getSavedTracks()))
+                .commit();
+        getSupportActionBar().setTitle(R.string.nav_saved_music);
     }
 
     @Override
@@ -61,9 +70,6 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -99,6 +105,8 @@ public class MainActivity extends AppCompatActivity
                 break;
             case R.id.nav_settings:
                 getSupportActionBar().setTitle(R.string.nav_settings);
+                getSupportFragmentManager().beginTransaction().replace(R.id.content_main,
+                        new SettingsFragment()).commit();
                 break;
         }
 
@@ -108,8 +116,15 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        Settings.getInstance().writeSettings();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         CurrentPlaylistPresenter.getInstance().onDestroy(this);
+        Settings.getInstance().writeSettings();
     }
 }
