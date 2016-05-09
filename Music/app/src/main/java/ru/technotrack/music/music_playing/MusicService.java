@@ -54,6 +54,10 @@ public class MusicService extends Service
     public void onCreate() {
         super.onCreate();
 
+        requestAudioFocus();
+    }
+
+    private void requestAudioFocus() {
         AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         int result = audioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC,
                 AudioManager.AUDIOFOCUS_GAIN);
@@ -211,6 +215,10 @@ public class MusicService extends Service
 
         mWifiLock.acquire();
 
+        if (mAudioFocusState != AudioManager.AUDIOFOCUS_GAIN) {
+            requestAudioFocus();
+        }
+
         if (mIsTrackPrepared) {
             mMediaPlayer.start();
             if (mCallback != null) {
@@ -238,6 +246,9 @@ public class MusicService extends Service
 
     @Override
     public void stop() {
+        if (mCallback != null && isPlaying()) {
+            mCallback.onEndPlaying(mPlayingTrack);
+        }
         releaseMediaPlayer();
     }
 

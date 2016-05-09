@@ -48,7 +48,11 @@ public class PlayListRecycleViewAdapter
 
     @Override
     public int getItemCount() {
-        return mTracks.size();
+        if (mTracks != null) {
+            return mTracks.size();
+        } else {
+            return 0;
+        }
     }
 
     @Override

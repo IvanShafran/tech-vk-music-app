@@ -81,6 +81,8 @@ public class MainActivity extends AppCompatActivity
                                 .newInstance(CurrentPlaylistPresenter.
                                         getInstance().getPlaylist()))
                         .commit();
+
+                getSupportActionBar().setTitle(R.string.nav_current_playlist);
                 break;
             case R.id.nav_saved_tracks:
                 getSupportFragmentManager().beginTransaction()
@@ -88,12 +90,15 @@ public class MainActivity extends AppCompatActivity
                                 .newInstance(CurrentPlaylistPresenter
                                         .getInstance().getSavedTracks()))
                         .commit();
+                getSupportActionBar().setTitle(R.string.nav_saved_music);
                 break;
             case R.id.nav_search:
                 getSupportFragmentManager().beginTransaction().replace(R.id.content_main,
                         new PostListFragment()).commit();
+                getSupportActionBar().setTitle(R.string.nav_search);
                 break;
             case R.id.nav_settings:
+                getSupportActionBar().setTitle(R.string.nav_settings);
                 break;
         }
 
