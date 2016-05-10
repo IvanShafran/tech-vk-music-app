@@ -97,10 +97,8 @@ public class MusicService extends Service
 
                     if (mIsMusicPlaying) {
                         pause();
-                        updateNotificationViewsState(false);
                     } else {
                         play();
-                        updateNotificationViewsState(true);
                     }
                     break;
                 case PREV_ACTION:
@@ -118,7 +116,6 @@ public class MusicService extends Service
                     }
 
                     setPrevTrack();
-                    updateNotificationViewsState(true);
                     break;
                 case NEXT_ACTION:
                     Log.d(TAG, NEXT_ACTION);
@@ -130,22 +127,23 @@ public class MusicService extends Service
 
                     if (mPlayingTrack == mPlaylist.size() - 1
                             && !Settings.getInstance().isRepeatPlaylist()) {
-                        Toast.makeText(this, "This is first track in playlist!",
+                        Toast.makeText(this, "This is last track in playlist!",
                                 Toast.LENGTH_SHORT).show();
                         break;
                     }
 
                     setNextTrack();
-                    updateNotificationViewsState(true);
                     break;
             }
         }
 
+        updateNotificationViewsState();
+
         return START_STICKY;
     }
 
-    private void updateNotificationViewsState(boolean isMusicPlaying) {
-        if (isMusicPlaying) {
+    private void updateNotificationViewsState() {
+        if (mIsMusicPlaying) {
             mViews.setImageViewResource(R.id.status_bar_play,
                     R.drawable.ic_pause_black_48dp);
             mBigViews.setImageViewResource(R.id.status_bar_play,
@@ -236,7 +234,7 @@ public class MusicService extends Service
         status.icon = R.drawable.ic_music_note_black_48dp;
         status.contentIntent = pendingIntent;
 
-        updateNotificationViewsState(false);
+        updateNotificationViewsState();
     }
 
     private void requestAudioFocus() {
@@ -460,7 +458,7 @@ public class MusicService extends Service
             startWithPreparingTrack();
         }
 
-        updateNotificationViewsState(true);
+        updateNotificationViewsState();
     }
 
     @Override
@@ -479,7 +477,7 @@ public class MusicService extends Service
             Log.e(TAG, "pause / null MediaPlayer");
         }
 
-        updateNotificationViewsState(false);
+        updateNotificationViewsState();
     }
 
     @Override
@@ -491,7 +489,7 @@ public class MusicService extends Service
         mIsMusicPlaying = false;
 
         releaseMediaPlayer();
-        updateNotificationViewsState(false);
+        updateNotificationViewsState();
     }
 
     @Override
