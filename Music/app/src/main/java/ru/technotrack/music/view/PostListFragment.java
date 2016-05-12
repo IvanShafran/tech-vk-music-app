@@ -26,7 +26,7 @@ public class PostListFragment extends Fragment {
     private final static String POST_ARGUMENT = "POST_ARGUMENT";
 
     private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
+    private PostRecycleViewAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private ArrayList<Post> mPosts;
 
@@ -76,12 +76,22 @@ public class PostListFragment extends Fragment {
         //отступ у картинки от краёв
         width -= 2 * getResources().getDimensionPixelSize(R.dimen.activity_horizontal_margin);
 
-        mAdapter = new PostRecycleViewAdapter(getPosts(), this.getContext(),
+        Bundle args = getArguments();
+        mPosts = new ArrayList<>();
+        if (args != null) {
+            mPosts = (ArrayList<Post>) args.get(POST_ARGUMENT);
+        }
+
+        mAdapter = new PostRecycleViewAdapter(mPosts, this.getContext(),
                 mType,
                 width, height);
         mRecyclerView.setAdapter(mAdapter);
 
         return view;
+    }
+
+    public void updatePosts(List<Post> posts) {
+        mAdapter.setPosts(posts);
     }
 
     private List<Post> getPosts() {

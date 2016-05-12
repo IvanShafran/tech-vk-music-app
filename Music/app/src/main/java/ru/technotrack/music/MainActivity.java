@@ -12,7 +12,7 @@ import android.view.MenuItem;
 
 import ru.technotrack.music.presenter.CurrentPlaylistPresenter;
 import ru.technotrack.music.view.PlayListFragment;
-import ru.technotrack.music.view.PostListFragment;
+import ru.technotrack.music.view.SearchFragment;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -100,7 +100,7 @@ public class MainActivity extends AppCompatActivity
                 break;
             case R.id.nav_search:
                 getSupportFragmentManager().beginTransaction().replace(R.id.content_main,
-                        new PostListFragment()).commit();
+                        new SearchFragment()).commit();
                 getSupportActionBar().setTitle(R.string.nav_search);
                 break;
             case R.id.nav_settings:

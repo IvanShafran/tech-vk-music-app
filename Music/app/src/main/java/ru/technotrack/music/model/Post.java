@@ -2,13 +2,30 @@ package ru.technotrack.music.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import ru.technotrack.music.server.IAPI;
 
 public class Post implements Parcelable {
     private String text;
     private String pictureLink;
     private List<Track> tracks;
+
+    public static Post parse(IAPI.PostJSON post) {
+        Post parsed = new Post();
+        Log.d("KEK", "Parsed post: " + post.text);
+        parsed.text = post.text;
+        // TODO: Исправить временную аватарку
+        parsed.pictureLink = "http://cs621731.vk.me/v621731163/1eb8/LUWqD8I5JJw.jpg";
+        parsed.tracks = new ArrayList<>();
+        for (IAPI.TrackJSON track : post.tracks) {
+            parsed.tracks.add(Track.parse(track));
+        }
+        return parsed;
+    }
 
     public Post() {
     }

@@ -2,6 +2,7 @@ package ru.technotrack.music.view;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -103,6 +104,7 @@ public class PostRecycleViewAdapter
         Post post = mPosts.get(position);
         holder.setText(post.getText());
         holder.setPicture(post.getPictureLink());
+        Log.d("KEK", "onBind: " + Integer.toString(post.getTracks().size()) + " " + post.getText());
         for (int i = 0; i < post.getTracks().size(); ++i) {
             holder.addTrack(position, i, post.getTracks().get(i));
         }
@@ -111,6 +113,22 @@ public class PostRecycleViewAdapter
     @Override
     public int getItemCount() {
         return mPosts.size();
+    }
+
+    public void setPosts(List<Post> posts) {
+        mPosts = posts;
+        mTrackImageViews = new HashMap<>();
+        mTracks = new ArrayList<>();
+        mTrackIndexInPlaylist = new HashMap<>();
+        for (int i = 0; i < mPosts.size(); ++i) {
+            Post post = mPosts.get(i);
+            mTrackIndexInPlaylist.put(i, new HashMap<Integer, Integer>());
+            for (int j = 0; j < post.getTracks().size(); ++j) {
+                mTrackIndexInPlaylist.get(i).put(j, mTracks.size());
+                mTracks.add(post.getTracks().get(j));
+            }
+        }
+        notifyDataSetChanged();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

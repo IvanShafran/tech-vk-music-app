@@ -3,14 +3,26 @@ package ru.technotrack.music.model;
 import android.os.Parcel;
 import android.os.ParcelUuid;
 import android.os.Parcelable;
+import android.util.Log;
 
 import java.util.UUID;
+
+import ru.technotrack.music.server.IAPI;
 
 public class Track implements Parcelable {
     private String artist;
     private String name;
     private String link;
     private ParcelUuid id;
+
+    public static Track parse(IAPI.TrackJSON track) {
+        Track parsed = new Track();
+        Log.d("KEK", "Parsed: " + track.band + " " + track.name);
+        parsed.artist = track.band;
+        parsed.name = track.name;
+        parsed.link = track.url;
+        return parsed;
+    }
 
     public Track() {
     }
