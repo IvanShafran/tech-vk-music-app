@@ -29,6 +29,7 @@ public class PostListFragment extends Fragment {
     private PostRecycleViewAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private ArrayList<Post> mPosts;
+    private View mProgress;
 
     public static PostListFragment newInstance(ArrayList<Post> posts) {
         Bundle args = new Bundle();
@@ -49,13 +50,15 @@ public class PostListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                 Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.recycle_list_layout, container, false);
+        View view = inflater.inflate(R.layout.post_list_layout, container, false);
 
-        mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
+        mRecyclerView = (RecyclerView) view.findViewById(R.id.post_recycler_view);
         mRecyclerView.setHasFixedSize(true);
 
         mLayoutManager = new LinearLayoutManager(this.getContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
+
+        mProgress = view.findViewById(R.id.request_progress);
 
         String mType;
         if (getContext().getResources().getConfiguration().orientation
@@ -92,6 +95,14 @@ public class PostListFragment extends Fragment {
 
     public void updatePosts(List<Post> posts) {
         mAdapter.setPosts(posts);
+    }
+
+    public void showProgress() {
+        mProgress.setVisibility(View.VISIBLE);
+    }
+
+    public void hideProgress() {
+        mProgress.setVisibility(View.GONE);
     }
 
     private List<Post> getPosts() {

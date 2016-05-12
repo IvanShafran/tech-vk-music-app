@@ -42,6 +42,7 @@ public class SearchFragment extends Fragment {
         mInputName = (EditText) view.findViewById(R.id.input_name);
         mSubmitButton = (Button) view.findViewById(R.id.submit_button);
 
+
         mSubmitButton.setOnClickListener((v) -> {
             PostListFragment fragment = new PostListFragment();
             getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.content_main,
@@ -53,8 +54,9 @@ public class SearchFragment extends Fragment {
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe((newPosts) -> {
+                        fragment.hideProgress();
                         fragment.updatePosts(Arrays.asList(newPosts));
-                    }, mOnError);
+                    }, mOnError)    ;
             //getActivity().getSupportActionBar().setTitle(R.string.nav_search);
         });
         return view;
@@ -86,4 +88,6 @@ public class SearchFragment extends Fragment {
             Toast.makeText(getContext(), exception.getMessage(), Toast.LENGTH_SHORT).show();
         }
     };
+
+
 }
