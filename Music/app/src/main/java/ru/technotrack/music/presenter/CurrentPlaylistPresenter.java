@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import ru.technotrack.music.model.IMusicStorage;
 import ru.technotrack.music.model.StubMusicStorage;
 import ru.technotrack.music.model.Track;
+import ru.technotrack.music.model.TrackDB;
 import ru.technotrack.music.music_playing.IMusicService;
 import ru.technotrack.music.music_playing.MusicService;
 import ru.technotrack.music.view.ICurrentPlaylistView;
@@ -24,6 +25,7 @@ public class CurrentPlaylistPresenter implements ICurrentPlaylistPresenter, Musi
     private boolean mIsBoundService;
     private ICurrentPlaylistView mCurrentPlaylistView;
     private IMusicStorage mMusicStorage;
+    private TrackDB mDatabase;
 
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
@@ -141,8 +143,9 @@ public class CurrentPlaylistPresenter implements ICurrentPlaylistPresenter, Musi
 
         context.getApplicationContext().bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 
-        mMusicStorage = new StubMusicStorage();
-        mMusicStorage.loadTracks();
+        mDatabase = new TrackDB(context);
+        mMusicStorage = new StubMusicStorage(mDatabase);
+        mMusicStorage.loadSavedTracks();
     }
 
     @Override
@@ -152,7 +155,8 @@ public class CurrentPlaylistPresenter implements ICurrentPlaylistPresenter, Musi
             mIsBoundService = false;
         }
 
-        mMusicStorage.writeTracks();
+        mMusicStorage.writeSavedTracks();
+        mDatabase.close();
     }
 
     //Music service callback

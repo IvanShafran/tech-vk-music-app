@@ -10,6 +10,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import ru.technotrack.music.model.Track;
+import ru.technotrack.music.model.TrackDB;
 import ru.technotrack.music.presenter.CurrentPlaylistPresenter;
 import ru.technotrack.music.view.PlayListFragment;
 import ru.technotrack.music.view.SearchFragment;
@@ -23,6 +25,8 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(

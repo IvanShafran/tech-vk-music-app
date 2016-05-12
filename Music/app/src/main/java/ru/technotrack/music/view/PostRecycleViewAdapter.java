@@ -104,7 +104,6 @@ public class PostRecycleViewAdapter
         Post post = mPosts.get(position);
         holder.setText(post.getText());
         holder.setPicture(post.getPictureLink());
-        Log.d("KEK", "onBind: " + Integer.toString(post.getTracks().size()) + " " + post.getText());
         for (int i = 0; i < post.getTracks().size(); ++i) {
             holder.addTrack(position, i, post.getTracks().get(i));
         }

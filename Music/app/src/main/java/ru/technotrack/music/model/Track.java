@@ -17,7 +17,6 @@ public class Track implements Parcelable {
 
     public static Track parse(IAPI.TrackJSON track) {
         Track parsed = new Track();
-        Log.d("KEK", "Parsed: " + track.band + " " + track.name);
         parsed.artist = track.band;
         parsed.name = track.name;
         parsed.link = track.url;

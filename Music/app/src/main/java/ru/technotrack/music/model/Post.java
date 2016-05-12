@@ -16,7 +16,6 @@ public class Post implements Parcelable {
 
     public static Post parse(IAPI.PostJSON post) {
         Post parsed = new Post();
-        Log.d("KEK", "Parsed post: " + post.text);
         parsed.text = post.text;
         // TODO: Исправить временную аватарку
         parsed.pictureLink = "http://cs621731.vk.me/v621731163/1eb8/LUWqD8I5JJw.jpg";
