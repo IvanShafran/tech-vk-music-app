@@ -1,5 +1,6 @@
 package ru.technotrack.music;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -10,14 +11,22 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.util.List;
+
 import ru.technotrack.music.model.Track;
-import ru.technotrack.music.model.TrackDB;
 import ru.technotrack.music.presenter.CurrentPlaylistPresenter;
 import ru.technotrack.music.view.PlayListFragment;
 import ru.technotrack.music.view.SearchFragment;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+    public static final String SAVED_TRACKS = "SavedTracks";
+    public static final String LAST_PLAYLIST_TRACKS = "LastPlayListTracks";
+    public static final String LAST_TRACK = "LastTrack";
+
+    private List<Track> mSavedTracks;
+    private List<Track> mLastPlaylistTracks;
+    private Track mLastTrack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,7 +35,10 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-
+        Intent intent = getIntent();
+        mSavedTracks = intent.getParcelableArrayListExtra(SAVED_TRACKS);
+        mLastPlaylistTracks = intent.getParcelableArrayListExtra(LAST_PLAYLIST_TRACKS);
+        mLastTrack = intent.getParcelableExtra(LAST_TRACK);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(

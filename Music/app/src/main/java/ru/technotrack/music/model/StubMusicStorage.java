@@ -41,6 +41,9 @@ public class StubMusicStorage implements IMusicStorage {
 
     @Override
     public void loadSavedTracks() {
+        /*
+        Использовать этот метод не нужно, т.к. все данные были получены при загрузке
+         */
         /*Track track = new Track();
         track.setArtist("Moby");
         track.setName("Mistake");
