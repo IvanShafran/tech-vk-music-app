@@ -317,8 +317,10 @@ public class MusicService extends Service
 
     @Override
     public void setPlaylist(ArrayList<Track> playlist) {
-        mPlaylist = playlist;
-        mIsTrackPrepared = false;
+        if (!playlist.equals(mPlaylist)) {
+            mPlaylist = playlist;
+            mIsTrackPrepared = false;
+        }
     }
 
     @Override
